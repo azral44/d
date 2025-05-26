@@ -17,6 +17,16 @@
 #define MAX_NETWORKS 256
 #define MAX_HANDSHAKES 128
 
+// ==== Signal Icon Helper ====
+const char* get_signal_icon(const char *signal_dbm) {
+    int pwr = atoi(signal_dbm);
+    if (pwr >= -50) return "network-wireless-signal-excellent";
+    if (pwr >= -60) return "network-wireless-signal-good";
+    if (pwr >= -70) return "network-wireless-signal-ok";
+    if (pwr >= -80) return "network-wireless-signal-weak";
+    return "network-wireless-signal-none";
+}
+
 typedef struct {
     char ssid[64];
     char bssid[32];
@@ -99,15 +109,8 @@ gboolean add_handshake_gui(gpointer data) {
     return FALSE;
 }
 
-// ==== Signal Icon Helper ====
-const char* get_signal_icon(const char *signal_dbm) {
-    int pwr = atoi(signal_dbm);
-    if (pwr >= -50) return "network-wireless-signal-excellent";
-    if (pwr >= -60) return "network-wireless-signal-good";
-    if (pwr >= -70) return "network-wireless-signal-ok";
-    if (pwr >= -80) return "network-wireless-signal-weak";
-    return "network-wireless-signal-none";
-}
+
+
 
 // ==== CSV Parsing (airodump-ng) ====
 void parse_airodump_csv(const char *csv_file) {
