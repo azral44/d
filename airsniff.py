@@ -3978,10 +3978,16 @@ ICON_MAP = {
     'AP': QtGui.QIcon.fromTheme("network-wireless"),
     'STA': QtGui.QIcon.fromTheme("computer"),
     'Phone': QtGui.QIcon.fromTheme("phone"),
-    'TV': QtGui.QIcon.fromTheme("tv"),
+    'TV': QtGui.QIcon.fromTheme("television"),
     'Laptop': QtGui.QIcon.fromTheme("computer-laptop"),
     'IoT': QtGui.QIcon.fromTheme("media-flash"),
     'Router': QtGui.QIcon.fromTheme("network-wired"),
+    'Printer': QtGui.QIcon.fromTheme("printer"),
+    'Network': QtGui.QIcon.fromTheme("network-wireless"),
+    'SetTopBox': QtGui.QIcon.fromTheme("media-playback-start"),
+    'Wearable': QtGui.QIcon.fromTheme("watch"),
+    'Car': QtGui.QIcon.fromTheme("car"),
+    'Tablet': QtGui.QIcon.fromTheme("tablet"),
     'Unknown': QtGui.QIcon.fromTheme("help"),
     'WPS': QtGui.QIcon.fromTheme("emblem-default"),
 }
@@ -4435,8 +4441,18 @@ class MainWindow(QtWidgets.QWidget):
         if bssid not in self.networks:
             row = self.network_table.rowCount()
             self.network_table.insertRow(row)
+            
+            # Get device type for AP using BSSID
+            ap_type = get_device_type(bssid)
+            ap_icon = ICON_MAP.get(ap_type, ICON_MAP['AP'])
             icon_item = QtWidgets.QTableWidgetItem()
-            icon_item.setIcon(ICON_MAP['AP'])
+            icon_item.setIcon(ap_icon)
+            # Optional: show vendor as tooltip
+            vendor = OUI_VENDOR_MAP.get(bssid.upper()[:8], OUI_VENDOR_MAP.get(":".join(bssid.upper().split(":")[:3]), "Unknown"))
+            if isinstance(vendor, tuple):
+                vendor = vendor[0]
+            icon_item.setToolTip(f"{ap_type} - {vendor}")
+
             self.network_table.setItem(row, 0, icon_item)
             self.network_table.setItem(row, 1, QtWidgets.QTableWidgetItem(bssid))
             self.network_table.setItem(row, 2, QtWidgets.QTableWidgetItem(net['ssid']))
@@ -4465,8 +4481,19 @@ class MainWindow(QtWidgets.QWidget):
                         wps_item.setIcon(ICON_MAP['WPS'])
                     self.network_table.setItem(row, 8, wps_item)
                     self.network_table.setItem(row, 9, QtWidgets.QTableWidgetItem(str(net['data'])))
+                    # Update icon if device type changes
+                    ap_type = get_device_type(bssid)
+                    ap_icon = ICON_MAP.get(ap_type, ICON_MAP['AP'])
+                    icon_item = QtWidgets.QTableWidgetItem()
+                    icon_item.setIcon(ap_icon)
+                    vendor = OUI_VENDOR_MAP.get(bssid.upper()[:8], OUI_VENDOR_MAP.get(":".join(bssid.upper().split(":")[:3]), "Unknown"))
+                    if isinstance(vendor, tuple):
+                        vendor = vendor[0]
+                    icon_item.setToolTip(f"{ap_type} - {vendor}")
+                    self.network_table.setItem(row, 0, icon_item)
                     break
             self.networks[bssid].update(net)
+
 
     def update_data_count(self, bssid, count):
         if bssid in self.networks:
